@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Holding Triple A - Prototipo Funcional</title>
+<style>
+  :root{
+    --bgdark:#12141C;
+    --sidebar:#1C1C1E;
+    --navy:#1C1C1E;
+    --blue:#3B82F6;
+    --blueglow:#60A5FA;
+    --orange:#F59E0B;
+    --green:#22C55E;
+    --red:#EF4444;
+    --textgray:#9AA0A6;
+    --border:#2A2D38;
+  }
+  *{box-sizing:border-box;}
+  body{font-family:Arial, Helvetica, sans-serif; margin:0; background:#e9ecef; color:#222;}
+  .browser{max-width:1180px; margin:24px auto; box-shadow:0 4px 18px rgba(0,0,0,.25); border-radius:8px; overflow:hidden;}
+  .chrome{background:#0b0c10; color:white; padding:8px 14px; font-size:13px; display:flex; align-items:center; gap:8px;}
+  .dot{width:10px;height:10px;border-radius:50%;}
+  .app{background:var(--bgdark); min-height:600px; color:#fff;}
+  .layout{display:flex; min-height:600px;}
+
+  .sidebar{width:220px; background:var(--sidebar); padding:20px 14px; display:flex; flex-direction:column;}
+  .sidebar .brand{font-size:19px; font-weight:bold; color:#fff; margin-bottom:2px; line-height:1.15;}
+  .sidebar .brand-sub{font-size:11px; color:var(--textgray); margin-bottom:20px;}
+  .sidebar .brand.scoped{color:var(--blueglow);}
+  .sidebar .group-label{font-size:10px; letter-spacing:.05em; color:var(--textgray); text-transform:uppercase; margin:14px 0 6px 6px;}
+  .sidebar button{display:block; width:100%; text-align:left; padding:9px 12px; margin-bottom:4px; border:none; border-radius:6px; background:transparent; color:#d7dbe0; font-size:13px; cursor:pointer;}
+  .sidebar button.active{background:var(--blue); color:white; font-weight:bold;}
+  .sidebar .empresa-item{font-size:12.5px; padding:7px 12px;}
+  .sidebar .account{margin-top:auto; display:flex; align-items:center; gap:10px; padding-top:14px; border-top:1px solid var(--border);}
+  .avatar{width:32px; height:32px; border-radius:50%; background:var(--blue); flex-shrink:0;}
+  .account b{display:block; font-size:12.5px; color:#fff;}
+  .account span{font-size:10.5px; color:var(--textgray);}
+
+  .content{flex:1; padding:26px 30px;}
+  .breadcrumb{font-size:11.5px; color:var(--textgray); margin-bottom:4px;}
+  .pagetitle{display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;}
+  .pagetitle h1{font-size:22px; margin:0; color:#fff;}
+  .role-tag{background:var(--blue); color:white; font-size:10.5px; padding:3px 9px; border-radius:10px; margin-left:10px; vertical-align:middle;}
+
+  .kpis{display:flex; gap:14px; margin-bottom:18px; flex-wrap:wrap;}
+  .kpi{background:#1A1D27; border:1px solid var(--border); border-radius:8px; padding:14px 20px; min-width:140px;}
+  .kpi b{display:block; font-size:24px; margin-bottom:4px;}
+  .kpi span{font-size:11px; color:var(--textgray);}
+  .kpi.blue b{color:var(--blue);} .kpi.green b{color:var(--green);} .kpi.red b{color:var(--red);} .kpi.orange b{color:var(--orange);}
+
+  table{width:100%; border-collapse:collapse; margin-top:6px; font-size:13px;}
+  th{color:var(--textgray); font-size:10.5px; text-transform:uppercase; letter-spacing:.03em; text-align:left; padding:8px 10px; border-bottom:1px solid var(--border); font-weight:normal;}
+  td{padding:10px; border-bottom:1px solid var(--border); color:#e6e8eb;}
+  .badge{padding:3px 10px; border-radius:10px; font-size:11px; font-weight:bold;}
+  .badge.green{background:rgba(34,197,94,.18); color:#4ADE80;}
+  .badge.red{background:rgba(239,68,68,.18); color:#F87171;}
+
+  .form-grid{display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin-bottom:14px;}
+  input, select{padding:9px 10px; border:1px solid var(--border); border-radius:5px; font-size:13px; width:100%; background:#1A1D27; color:#fff;}
+  input::placeholder{color:#6b6f7a;}
+  label{font-size:10.5px; color:var(--textgray); display:block; margin-bottom:3px; text-transform:uppercase; letter-spacing:.03em;}
+  .btn{padding:9px 18px; border:none; border-radius:6px; color:white; font-size:13px; cursor:pointer; margin-right:8px; font-weight:bold;}
+  .btn-primary{background:var(--blue);}
+  .btn-orange{background:var(--orange); color:#1A1200;}
+  .btn-danger{background:#3a3d47; color:#f0f0f0;}
+  .btn-success{background:var(--green);}
+  .screen{display:none;}
+  .screen.active{display:block;}
+
+  .login-wrap{min-height:600px; display:flex; align-items:center; justify-content:center; background:var(--bgdark);}
+  .login-box{max-width:380px; width:100%; background:#1A1D27; border:1px solid var(--border); border-radius:10px; padding:32px;}
+  .login-box h2{margin:0 0 2px; font-size:19px; color:#fff;}
+  .login-box .sub{font-size:12px; color:var(--textgray); margin-bottom:20px;}
+  .login-box label{margin-top:12px;}
+  .checkline{display:flex; align-items:center; gap:6px; font-size:12px; margin:14px 0; color:#c7cad0;}
+  .hint{font-size:10.5px; color:#7d818c; margin-top:14px; line-height:1.5;}
+  .hint b{color:#b7bac2;}
+
+  .reportcards{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+  .rcard{background:#1A1D27; border:1px solid var(--border); border-radius:8px; padding:16px;}
+  .rcard b{color:#fff; display:block; margin-bottom:10px; font-size:13px;}
+  .bar{background:var(--blue); height:12px; border-radius:2px; margin-bottom:6px;}
+  .toolbar{display:flex; gap:12px; margin-bottom:16px; flex-wrap:wrap; align-items:flex-end;}
+  .toolbar > div{flex:1; min-width:160px;}
+  footer{text-align:center; font-size:11px; color:#666; padding:10px; background:#e9ecef;}
+  .scope-note{background:rgba(245,166,35,.12); border:1px solid var(--orange); color:#f5c778; font-size:11.5px; padding:9px 13px; border-radius:6px; margin-bottom:16px;}
+
+  .test-guide{margin-top:16px; font-size:11px;}
+  .test-guide summary{cursor:pointer; color:var(--blueglow); font-weight:bold; list-style:none; padding:6px 0; border-top:1px solid var(--border);}
+  .test-guide summary::-webkit-details-marker{display:none;}
+  .test-guide summary::before{content:"▸ "; }
+  .test-guide[open] summary::before{content:"▾ "; }
+  .test-guide .tg-body{background:#12141C; border:1px solid var(--border); border-radius:6px; padding:12px 14px; margin-top:8px; color:#c7cad0; line-height:1.6;}
+  .test-guide .tg-body b{color:#fff;}
+  .test-guide .tg-body ul{margin:6px 0 0; padding-left:18px;}
+  .test-guide .tg-body li{margin-bottom:6px;}
+</style>
+</head>
+<body>
+<div class="browser">
+  <div class="chrome">
+    <span class="dot" style="background:#E74C3C"></span>
+    <span class="dot" style="background:#F39C12"></span>
+    <span class="dot" style="background:#27AE60"></span>
+    <span id="urlbar" style="margin-left:10px;">holding-triplea.cl/login</span>
+  </div>
+  <div class="app">
+
+    <!-- PANTALLA 1: LOGIN -->
+    <div class="screen active" id="screen-login">
+      <div class="login-wrap">
+        <div class="login-box">
+          <h2>Holding Triple A</h2>
+          <div class="sub">Sistema de Asistencia</div>
+          <label>txt_usuario</label>
+          <input type="text" id="txtUsuarioLogin" placeholder="ej: ana.perez">
+          <label>txt_password</label>
+          <input type="password" placeholder="••••••••">
+          <div class="checkline"><input type="checkbox" id="chkRecordar"><label for="chkRecordar" style="margin:0;">chk_recordar &mdash; Recordarme en este equipo</label></div>
+          <button class="btn btn-primary" style="width:100%" onclick="ingresar()">btn_ingresar</button>
+          <p class="hint">La empresa y el rol no se eligen aquí: se resuelven automáticamente consultando el directorio del esquema transversal. Prueba con <b>ana.perez</b> (Austral Corp), <b>jorge.soto</b> (American Tur), <b>valentina.fuentes</b> (Astral Trip) o <b>admin.ti</b> (Administrador Holding).</p>
+          <details class="test-guide">
+            <summary>Guía de recorrido para probar el prototipo</summary>
+            <div class="tg-body">
+              La contraseña no se valida en este prototipo, cualquier texto funciona. Lo único relevante es el usuario.
+              <ul>
+                <li><b>ana.perez / jorge.soto / valentina.fuentes</b>: cada una entra solo al universo de su propia empresa (Austral Corp, American Tur y Astral Trip respectivamente). No verás rastro de las otras dos.</li>
+                <li><b>admin.ti</b>: en el sidebar aparece el grupo Empresas. Haz clic en una empresa puntual para entrar a su universo, o en <b>Vista Transversal (todas)</b> para ver Empleados y Asistencia de las tres empresas juntas, con columna Empresa y KPI consolidados.</li>
+                <li>En Empleados, prueba btn_crear y btn_eliminar: la baja es lógica, la fila queda en <b>Inactivo</b> en vez de desaparecer.</li>
+              </ul>
+            </div>
+          </details>
+        </div>
+      </div>
+    </div>
+
+    <!-- PANTALLA 2: PANEL PRINCIPAL -->
+    <div class="screen" id="screen-panel">
+      <div class="layout">
+        <div class="sidebar" id="sidebar-panel">
+          <div class="brand js-brand">Holding Triple A</div>
+          <div class="brand-sub js-brand-sub">Sistema de Asistencia</div>
+          <div class="group-label">Principal</div>
+          <button class="active" onclick="goTo('panel')">Panel principal</button>
+          <div class="group-label empresas-group">Empresas</div>
+          <button class="empresa-item empresas-group transversal-item" onclick="setEmpresa('TODAS')" style="font-weight:bold;">Vista Transversal (todas)</button>
+          <button class="empresa-item empresas-group" onclick="setEmpresa('Austral Corp')">Austral Corp</button>
+          <button class="empresa-item empresas-group" onclick="setEmpresa('American Tur')">American Tur</button>
+          <button class="empresa-item empresas-group" onclick="setEmpresa('Astral Trip')">Astral Trip</button>
+          <div class="group-label">Gestión</div>
+          <button onclick="goTo('empleados')">Empleados</button>
+          <div class="group-label">Asistencia</div>
+          <button onclick="goTo('asistencia')">Registro</button>
+          <div class="group-label">Reportes</div>
+          <button onclick="goTo('reportes')">Dotación / Asistencia</button>
+          <button onclick="goTo('login')" style="margin-top:10px;">Salir</button>
+          <div class="account">
+            <div class="avatar"></div>
+            <div><b id="accNamePanel">Ana Pérez</b><span id="accRolePanel">Encargado &middot; Austral Corp</span></div>
+          </div>
+        </div>
+        <div class="content">
+          <div class="breadcrumb">Holding / Panel Principal</div>
+          <div class="pagetitle"><h1>Panel Principal <span class="role-tag" id="roleTagPanel">Encargado de Empresa</span></h1></div>
+          <div class="scope-note" id="scopeNotePanel">Esta cuenta solo puede ver el esquema de su propia empresa (<span id="scopeEmpresaTxt">Austral Corp</span>). No tiene acceso a los datos de las otras dos empresas del holding.</div>
+          <div class="kpis">
+            <div class="kpi blue"><b id="kpiDotacion">245</b><span>Dotación</span></div>
+            <div class="kpi green"><b id="kpiAsistencia">198</b><span>Asistencia Hoy</span></div>
+            <div class="kpi red"><b id="kpiAusentismo">12</b><span>Ausentismo</span></div>
+            <div class="kpi orange"><b id="kpiTurnos">34</b><span>Turnos Activos</span></div>
+          </div>
+          <div id="comparativoBlock" style="display:none; margin-top:10px;">
+            <h1 style="font-size:16px;">Comparativo por Empresa <span style="font-size:11px; color:var(--textgray); font-weight:normal;">(clic en una empresa del sidebar para abrir su universo)</span></h1>
+            <div id="cmpAustral" class="cmp-row" style="font-size:12px; margin:10px 0 4px; color:#d7dbe0;">Austral Corp - 120</div>
+            <div class="bar" style="width:82%"></div>
+            <div id="cmpAmerican" class="cmp-row" style="font-size:12px; margin:10px 0 4px; color:#d7dbe0;">American Tur - 85</div>
+            <div class="bar" style="width:60%"></div>
+            <div id="cmpAstral" class="cmp-row" style="font-size:12px; margin:10px 0 4px; color:#d7dbe0;">Astral Trip - 40</div>
+            <div class="bar" style="width:33%"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PANTALLA 3: EMPLEADOS -->
+    <div class="screen" id="screen-empleados">
+      <div class="layout">
+        <div class="sidebar" id="sidebar-empleados">
+          <div class="brand js-brand">Holding Triple A</div>
+          <div class="brand-sub js-brand-sub">Sistema de Asistencia</div>
+          <div class="group-label">Principal</div>
+          <button onclick="goTo('panel')">Panel principal</button>
+          <div class="group-label empresas-group">Empresas</div>
+          <button class="empresa-item empresas-group transversal-item" onclick="setEmpresa('TODAS')" style="font-weight:bold;">Vista Transversal (todas)</button>
+          <button class="empresa-item empresas-group" onclick="setEmpresa('Austral Corp')">Austral Corp</button>
+          <button class="empresa-item empresas-group" onclick="setEmpresa('American Tur')">American Tur</button>
+          <button class="empresa-item empresas-group" onclick="setEmpresa('Astral Trip')">Astral Trip</button>
+          <div class="group-label">Gestión</div>
+          <button class="active" onclick="goTo('empleados')">Empleados</button>
+          <div class="group-label">Asistencia</div>
+          <button onclick="goTo('asistencia')">Registro</button>
+          <div class="group-label">Reportes</div>
+          <button onclick="goTo('reportes')">Dotación / Asistencia</button>
+          <button onclick="goTo('login')" style="margin-top:10px;">Salir</button>
+          <div class="account">
+            <div class="avatar"></div>
+            <div><b id="accNameEmpleados">Ana Pérez</b><span id="accRoleEmpleados">Encargado &middot; Austral Corp</span></div>
+          </div>
+        </div>
+        <div class="content">
+          <div class="breadcrumb">Holding / Empleados</div>
+          <div class="pagetitle">
+            <h1>Gestión de Empleados</h1>
+            <button class="btn btn-orange" onclick="addRow()">+ Nuevo Empleado</button>
+          </div>
+          <div class="scope-note" id="scopeNoteEmpleados">Solo se listan los empleados del esquema de la empresa con la que se inició sesión.</div>
+          <div class="form-grid">
+            <div><label>txt_run</label><input placeholder="11.222.333-4"></div>
+            <div><label>txt_nombre</label><input placeholder="Nombre completo"></div>
+            <div><label>cmb_comuna</label><select><option>Valparaíso</option><option>Viña del Mar</option><option>Quilpué</option></select></div>
+            <div><label>cmb_estado_civil</label><select><option>Soltero(a)</option><option>Casado(a)</option><option>Conviviente civil</option></select></div>
+            <div><label>cmb_rol</label><select><option>Administrador</option><option>RR.HH.</option><option>Supervisor</option></select></div>
+            <div><label>chk_activo</label><input type="checkbox" checked></div>
+          </div>
+          <button class="btn btn-primary" onclick="addRow()">btn_crear</button>
+          <button class="btn btn-danger" onclick="delRow()">btn_eliminar (baja lógica)</button>
+          <table>
+            <thead><tr><th>RUN</th><th>Nombre</th><th>Comuna</th><th>Estado civil</th><th class="col-empresa" style="display:none;">Empresa</th><th>Estado</th></tr></thead>
+            <tbody id="tblEmpleados">
+              <tr data-empresa="Austral Corp"><td>11.222.333-4</td><td>María Pérez</td><td>Valparaíso</td><td>Casada</td><td class="col-empresa" style="display:none;">Austral Corp</td><td><span class="badge green">Activo</span></td></tr>
+              <tr data-empresa="American Tur"><td>12.345.678-9</td><td>Jorge Soto</td><td>Viña del Mar</td><td>Soltero</td><td class="col-empresa" style="display:none;">American Tur</td><td><span class="badge green">Activo</span></td></tr>
+              <tr data-empresa="Astral Trip"><td>10.222.111-5</td><td>Valentina Fuentes</td><td>Quilpué</td><td>Conviviente civil</td><td class="col-empresa" style="display:none;">Astral Trip</td><td><span class="badge green">Activo</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- PANTALLA 4: REPORTES -->
+    <div class="screen" id="screen-reportes">
+      <div class="layout">
+        <div class="sidebar" id="sidebar-reportes">
+          <div class="brand js-brand">Holding Triple A</div>
+          <div class="brand-sub js-brand-sub">Sistema de Asistencia</div>
+          <div class="group-label">Principal</div>
+          <button onclick="goTo('panel')">Panel principal</button>
+          <div class="group-label empresas-group">Empresas</div>
+          <button class="empresa-item empresas-group transversal-item" onclick="setEmpresa('TODAS')" style="font-weight:bold;">Vista Transversal (todas)</button>
+          <button class="empresa-item empresas-group" onclick="setEmpresa('Austral Corp')">Austral Corp</button>
+          <button class="empresa-item empresas-group" onclick="setEmpresa('American Tur')">American Tur</button>
+          <button class="empresa-item empresas-group" onclick="setEmpresa('Astral Trip')">Astral Trip</button>
+          <div class="group-label">Gestión</div>
+          <button onclick="goTo('empleados')">Empleados</button>
+          <div class="group-label">Asistencia</div>
+          <button onclick="goTo('asistencia')">Registro</button>
+          <div class="group-label">Reportes</div>
+          <button class="active" onclick="goTo('reportes')">Dotación / Asistencia</button>
+          <button onclick="goTo('login')" style="margin-top:10px;">Salir</button>
+          <div class="account">
+            <div class="avatar"></div>
+            <div><b id="accNameReportes">Ana Pérez</b><span id="accRoleReportes">Encargado &middot; Austral Corp</span></div>
+          </div>
+        </div>
+        <div class="content">
+          <div class="breadcrumb">Holding / Reportes</div>
+          <div class="pagetitle">
+            <h1>Reportes</h1>
+            <button class="btn btn-orange" onclick="generar()">Generar Reporte</button>
+          </div>
+          <div class="toolbar">
+            <div><label>cmb_reporte</label><select id="tipoReporte"><option>Dotación por estado civil</option><option>Dotación por comuna</option><option>Total empleados por empresa</option><option>Asistencia por empleado/empresa</option></select></div>
+            <div><label>date_rango</label><input type="text" placeholder="01/07/2026 - 31/07/2026"></div>
+          </div>
+          <div class="reportcards">
+            <div class="rcard"><b>Dotación por estado civil</b>
+              <div class="bar rep-bar" data-base="70"></div><div class="bar rep-bar" data-base="40"></div><div class="bar rep-bar" data-base="20"></div>
+            </div>
+            <div class="rcard"><b>Dotación por comuna</b>
+              <div class="bar rep-bar" data-base="55"></div><div class="bar rep-bar" data-base="65"></div><div class="bar rep-bar" data-base="30"></div>
+            </div>
+            <div class="rcard" id="rcardCrossCompany"><b>Total empleados por empresa (solo vista Holding)</b>
+              <div class="bar" style="width:82%"></div><div class="bar" style="width:60%"></div><div class="bar" style="width:48%"></div>
+            </div>
+            <div class="rcard"><b>Asistencia por empleado/empresa</b>
+              <div class="bar rep-bar" data-base="90"></div><div class="bar rep-bar" data-base="75"></div><div class="bar rep-bar" data-base="66"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PANTALLA 5: ASISTENCIA -->
+    <div class="screen" id="screen-asistencia">
+      <div class="layout">
+        <div class="sidebar" id="sidebar-asistencia">
+          <div class="brand js-brand">Holding Triple A</div>
+          <div class="brand-sub js-brand-sub">Sistema de Asistencia</div>
+          <div class="group-label">Principal</div>
+          <button onclick="goTo('panel')">Panel principal</button>
+          <div class="group-label empresas-group">Empresas</div>
+          <button class="empresa-item empresas-group transversal-item" onclick="setEmpresa('TODAS')" style="font-weight:bold;">Vista Transversal (todas)</button>
+          <button class="empresa-item empresas-group" onclick="setEmpresa('Austral Corp')">Austral Corp</button>
+          <button class="empresa-item empresas-group" onclick="setEmpresa('American Tur')">American Tur</button>
+          <button class="empresa-item empresas-group" onclick="setEmpresa('Astral Trip')">Astral Trip</button>
+          <div class="group-label">Gestión</div>
+          <button onclick="goTo('empleados')">Empleados</button>
+          <div class="group-label">Asistencia</div>
+          <button class="active" onclick="goTo('asistencia')">Registro</button>
+          <div class="group-label">Reportes</div>
+          <button onclick="goTo('reportes')">Dotación / Asistencia</button>
+          <button onclick="goTo('login')" style="margin-top:10px;">Salir</button>
+          <div class="account">
+            <div class="avatar"></div>
+            <div><b id="accNameAsistencia">Ana Pérez</b><span id="accRoleAsistencia">Encargado &middot; Austral Corp</span></div>
+          </div>
+        </div>
+        <div class="content">
+          <div class="breadcrumb">Holding / Registro de Asistencia</div>
+          <div class="pagetitle"><h1>Registro de Asistencia</h1></div>
+          <div class="toolbar">
+            <div><label>txt_run</label><input placeholder="Marcaje por RUN"></div>
+            <div><button class="btn btn-success" onclick="marcar()">btn_marcar</button></div>
+          </div>
+          <table>
+            <thead><tr><th>RUN</th><th>Nombre</th><th>Turno</th><th>Entrada</th><th>Salida</th><th class="col-empresa" style="display:none;">Empresa</th><th>Estado</th></tr></thead>
+            <tbody id="tblAsistencia">
+              <tr data-empresa="American Tur"><td>9.876.543-2</td><td>Carla Muñoz</td><td>T1</td><td>08:02</td><td>17:10</td><td class="col-empresa" style="display:none;">American Tur</td><td><span class="badge green">Presente</span></td></tr>
+              <tr data-empresa="Austral Corp"><td>10.111.222-3</td><td>Diego Rojas</td><td>T2</td><td>09:00</td><td>18:05</td><td class="col-empresa" style="display:none;">Austral Corp</td><td><span class="badge green">Presente</span></td></tr>
+              <tr data-empresa="Astral Trip"><td>15.234.567-8</td><td>Pedro Soto</td><td>T1</td><td>08:05</td><td>--</td><td class="col-empresa" style="display:none;">Astral Trip</td><td><span class="badge red">Ausente</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <footer>Taller de Diseño de Sistemas // Prototipo Funcional Holding Triple A // AIEP Online 2026</footer>
+</div>
+
+<script>
+let ROLE = 'empresa';
+let EMPRESA = 'Austral Corp';
+
+// Directorio simulado del esquema transversal: usuario -> {rol, empresa, nombre, cargo}
+// En el sistema real esta tabla vive en el esquema transversal (catálogos, roles, autenticación)
+// y es la que resuelve la empresa y el cargo del usuario, en vez de pedírselos a la persona en el login.
+const DIRECTORIO = {
+  'ana.perez':          { rol: 'empresa', empresa: 'Austral Corp',  nombre: 'Ana Pérez',         cargo: 'Encargada RR.HH.' },
+  'jorge.soto':         { rol: 'empresa', empresa: 'American Tur',  nombre: 'Jorge Soto',         cargo: 'Supervisor de Turnos' },
+  'valentina.fuentes':  { rol: 'empresa', empresa: 'Astral Trip',   nombre: 'Valentina Fuentes',  cargo: 'Encargada RR.HH.' },
+  'admin.ti':           { rol: 'admin',   empresa: 'Austral Corp',  nombre: 'Marcelo Iturra',     cargo: 'Administrador de Sistemas (TI)' }
+};
+let CARGO = 'Encargada RR.HH.';
+
+// KPIs propios de cada esquema: el "universo" que se abre al entrar a una empresa.
+// 'TODAS' es la vista transversal del administrador del holding: agrega los tres esquemas.
+const KPI_POR_EMPRESA = {
+  'Austral Corp':  { dotacion: 120, asistencia: 112, ausentismo: '4.2%', turnos: 14 },
+  'American Tur':  { dotacion: 85,  asistencia: 78,  ausentismo: '5.1%', turnos: 10 },
+  'Astral Trip':   { dotacion: 40,  asistencia: 34,  ausentismo: '6.5%', turnos: 6  },
+  'TODAS':         { dotacion: 245, asistencia: 224, ausentismo: '12 (consolidado)', turnos: 30 }
+};
+
+function ingresar(){
+  const usuario = document.getElementById('txtUsuarioLogin').value.trim().toLowerCase();
+  const registro = DIRECTORIO[usuario];
+  if (!registro){
+    alert('Usuario no encontrado en el directorio. Prueba con: ana.perez, jorge.soto, valentina.fuentes o admin.ti');
+    return; // no navega: evita el error de caer silenciosamente en un rol por defecto
+  }
+  ROLE = registro.rol;
+  EMPRESA = registro.empresa;
+  CARGO = registro.cargo;
+  document.querySelectorAll('[id^="accName"]').forEach(el => el.innerText = registro.nombre);
+  applyScope();
+  goTo('panel');
+}
+
+function applyScope(){
+  const isAdmin = (ROLE === 'admin');
+  const isTransversal = (EMPRESA === 'TODAS'); // solo posible si isAdmin
+
+  // Grupo "Empresas" en el sidebar: solo visible para el administrador del holding
+  document.querySelectorAll('.empresas-group').forEach(el => { el.style.display = isAdmin ? '' : 'none'; });
+
+  // Nombre bien visible arriba del sidebar: la empresa activa, o "Holding Triple A" en vista transversal
+  document.querySelectorAll('.js-brand').forEach(el => {
+    el.innerText = (!isAdmin) ? EMPRESA : (isTransversal ? 'Holding Triple A' : EMPRESA);
+    el.classList.toggle('scoped', !isAdmin || !isTransversal);
+  });
+  document.querySelectorAll('.js-brand-sub').forEach(el => {
+    if (!isAdmin) { el.innerText = 'Holding Triple A · Sistema de Asistencia'; }
+    else if (isTransversal) { el.innerText = 'Vista transversal · las 3 empresas'; }
+    else { el.innerText = 'Administrador · viendo ' + EMPRESA; }
+  });
+
+  // Etiqueta de rol y cuenta: se muestra el cargo real de la persona, no una categoría genérica
+  document.getElementById('roleTagPanel').innerText = CARGO;
+  const roleLabel = !isAdmin ? (CARGO + ' · ' + EMPRESA) : (isTransversal ? (CARGO + ' · vista transversal') : (CARGO + ' · viendo ' + EMPRESA));
+  document.querySelectorAll('[id^="accRole"]').forEach(el => el.innerText = roleLabel);
+
+  // Panel principal: comparativo entre empresas solo para admin (en cualquiera de sus dos modos)
+  document.getElementById('comparativoBlock').style.display = isAdmin ? '' : 'none';
+  document.getElementById('scopeNotePanel').style.display = isAdmin ? 'none' : '';
+  document.getElementById('scopeEmpresaTxt').innerText = EMPRESA;
+
+  // KPIs: reflejan el universo abierto (una empresa) o el consolidado (vista transversal)
+  const kpi = KPI_POR_EMPRESA[EMPRESA];
+  document.getElementById('kpiDotacion').innerText = kpi.dotacion;
+  document.getElementById('kpiAsistencia').innerText = kpi.asistencia;
+  document.getElementById('kpiAusentismo').innerText = kpi.ausentismo;
+  document.getElementById('kpiTurnos').innerText = kpi.turnos;
+
+  // Resalta, en el comparativo del administrador, la empresa cuyo universo está abierto
+  // (ninguna fila se resalta en vista transversal, porque ahí las tres tienen el mismo peso)
+  document.querySelectorAll('.cmp-row').forEach(el => el.style.fontWeight = 'normal');
+  const rowIds = {"Austral Corp":"cmpAustral", "American Tur":"cmpAmerican", "Astral Trip":"cmpAstral"};
+  const activeRow = document.getElementById(rowIds[EMPRESA]);
+  if (activeRow) activeRow.style.fontWeight = 'bold';
+
+  // Resalta el ítem activo dentro del grupo "Empresas" del sidebar (incluida Vista Transversal)
+  document.querySelectorAll('.empresa-item').forEach(btn => {
+    const esTransversalBtn = btn.classList.contains('transversal-item');
+    btn.classList.toggle('active', isAdmin && (esTransversalBtn ? isTransversal : btn.innerText.trim() === EMPRESA));
+  });
+
+  // Reportes: tarjeta cruzada entre empresas solo para admin
+  const rcardCross = document.getElementById('rcardCrossCompany');
+  if (rcardCross) rcardCross.style.display = isAdmin ? '' : 'none';
+
+  // Columna "Empresa" en las tablas: solo se muestra en vista transversal, para diferenciar
+  // filas de las tres compañías en un mismo listado (esto es lo que el caso pide poder emitir).
+  document.querySelectorAll('.col-empresa').forEach(el => { el.style.display = isTransversal ? '' : 'none'; });
+
+  // Empleados y Asistencia: en vista transversal se muestran las tres empresas juntas
+  // (con la columna Empresa visible); en cualquier otro caso, solo la empresa activa.
+  const noteEmp = document.getElementById('scopeNoteEmpleados');
+  if (noteEmp) noteEmp.style.display = (!isAdmin) ? '' : 'none';
+  document.querySelectorAll('#tblEmpleados tr, #tblAsistencia tr').forEach(row => {
+    row.style.display = isTransversal ? '' : (row.getAttribute('data-empresa') === EMPRESA ? '' : 'none');
+  });
+
+  // Reportes: los mini-gráficos por reporte se acotan a la empresa activa (escalando el ancho
+  // base según su tamaño relativo); en vista transversal se muestran a escala completa (consolidado).
+  const ESCALA_POR_EMPRESA = { 'Austral Corp': 1, 'American Tur': 0.71, 'Astral Trip': 0.33, 'TODAS': 1 };
+  const escala = ESCALA_POR_EMPRESA[EMPRESA] || 1;
+  document.querySelectorAll('.rep-bar').forEach(bar => {
+    const base = parseFloat(bar.getAttribute('data-base'));
+    bar.style.width = Math.min(95, Math.round(base * escala)) + '%';
+  });
+}
+
+function goTo(name){
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + name).classList.add('active');
+  document.getElementById('urlbar').innerText = 'holding-triplea.cl/' + name;
+  if (name !== 'login') applyScope();
+}
+function setEmpresa(v){
+  // Solo el administrador del holding puede cambiar de empresa (el grupo "Empresas" solo se ve en ese rol)
+  if (ROLE !== 'admin') return;
+  EMPRESA = v;
+  applyScope();
+}
+let n = 3;
+function empresaParaNuevoRegistro(){
+  // Si está en vista transversal, no hay una empresa "activa" a la cual asignar el registro
+  // nuevo: se usa Austral Corp como empresa por defecto del formulario (tal como cmb_empresa
+  // lo haría en la pantalla real de creación de usuario).
+  return (EMPRESA === 'TODAS') ? 'Austral Corp' : EMPRESA;
+}
+function addRow(){
+  const tbl = document.getElementById('tblEmpleados');
+  const row = tbl.insertRow();
+  const empresaNueva = empresaParaNuevoRegistro();
+  row.setAttribute('data-empresa', empresaNueva);
+  const colEmpresaVisible = (EMPRESA === 'TODAS');
+  row.innerHTML = `<td>1${n}.000.00${n}-K</td><td>Nuevo Empleado ${n}</td><td>Quilpué</td><td>Soltero</td><td class="col-empresa" style="display:${colEmpresaVisible ? '' : 'none'};">${empresaNueva}</td><td><span class="badge green">Activo</span></td>`;
+  n++;
+}
+function delRow(){
+  const tbl = document.getElementById('tblEmpleados');
+  if(tbl.rows.length > 0){ tbl.rows[tbl.rows.length-1].cells[5].innerHTML = '<span class="badge red">Inactivo</span>'; }
+}
+function generar(){
+  const alcance = (EMPRESA === 'TODAS') ? 'las tres empresas (vista transversal)' : ('el esquema de ' + EMPRESA);
+  alert('Generando reporte: ' + document.getElementById('tipoReporte').value + ' para ' + alcance + '.');
+}
+function marcar(){
+  const tbl = document.getElementById('tblAsistencia');
+  const row = tbl.insertRow();
+  const empresaNueva = empresaParaNuevoRegistro();
+  row.setAttribute('data-empresa', empresaNueva);
+  const colEmpresaVisible = (EMPRESA === 'TODAS');
+  const now = new Date();
+  const hh = String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
+  row.innerHTML = `<td>8.555.444-1</td><td>Marcaje manual</td><td>T1</td><td>${hh}</td><td>-</td><td class="col-empresa" style="display:${colEmpresaVisible ? '' : 'none'};">${empresaNueva}</td><td><span class="badge green">Presente</span></td>`;
+}
+</script>
+</body>
+</html>
